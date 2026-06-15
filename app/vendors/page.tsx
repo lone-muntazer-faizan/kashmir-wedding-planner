@@ -5,9 +5,9 @@ import VendorActions from "./VendorActions";
 
 export default async function VendorsPage() {
   const { data: vendors, error } = await supabase
-    .from("vendors")
-    .select("*")
-    .order("created_at", { ascending: false });
+  .from("vendors")
+  .select("*")
+  .order("created_at", { ascending: false });
 
   if (error) {
     return (
