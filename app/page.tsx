@@ -156,12 +156,7 @@ export default async function Home() {
       </section>
 
       {/* FEATURE SECTION */}
-      <section className="max-w-7xl mx-auto px-6 pb-24">
-        <div className="bg-gradient-to-r from-purple-800 to-pink-700 rounded-3xl p-12">
       
-        </div>
-      </section>
-
     </main>
   );
 }
