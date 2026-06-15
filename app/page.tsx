@@ -59,12 +59,9 @@ export default async function Home() {
               Explore Vendors
             </Link>
 
-            <Link
-              href="/become-vendor"
-              className="bg-black/30 backdrop-blur-md border border-white/30 px-8 py-4 rounded-xl hover:bg-black/50 transition"
-            >
-              Become Vendor
-            </Link>
+           <Link href="/vendor-entry">
+  Become Vendor
+</Link>
           </div>
         </div>
       </section>
@@ -159,21 +156,7 @@ export default async function Home() {
       {/* FEATURE SECTION */}
       <section className="max-w-7xl mx-auto px-6 pb-24">
         <div className="bg-gradient-to-r from-purple-800 to-pink-700 rounded-3xl p-12">
-          <h2 className="text-4xl font-bold mb-4">
-            Are You a Wedding Professional?
-          </h2>
-
-          <p className="text-lg text-white/90 mb-8">
-            Join Kashmir's fastest-growing wedding marketplace and
-            connect with thousands of couples.
-          </p>
-
-          <Link
-            href="/become-vendor"
-            className="inline-block bg-white text-black px-8 py-4 rounded-xl font-semibold"
-          >
-            Join as Vendor
-          </Link>
+      
         </div>
       </section>
 

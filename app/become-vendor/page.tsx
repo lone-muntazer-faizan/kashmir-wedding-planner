@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabaseClient } from "../../lib/client";
+import { useRouter } from "next/navigation";
 
 export default function BecomeVendorPage() {
+  const router = useRouter();
   const [businessName, setBusinessName] = useState("");
   const [category, setCategory] = useState("Photographer");
   const [district, setDistrict] = useState("");
@@ -20,6 +22,31 @@ const [services, setServices] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+ useEffect(() => {
+  async function checkAccess() {
+    const {
+      data: { user },
+    } = await supabaseClient.auth.getUser();
+
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    const { data: vendor } =
+      await supabaseClient
+        .from("vendors")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    if (vendor) {
+      router.push("/dashboard");
+    }
+  }
+
+  checkAccess();
+}, [router]);
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 

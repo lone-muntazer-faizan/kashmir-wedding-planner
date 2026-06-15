@@ -35,7 +35,7 @@ export default function LoginPage() {
     setMessage("Login successful!");
 
     setTimeout(() => {
-      router.push("/vendors");
+      router.push("/");
     }, 500);
   }
 
