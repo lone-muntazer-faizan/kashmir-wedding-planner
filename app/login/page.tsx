@@ -34,9 +34,13 @@ export default function LoginPage() {
 
     setMessage("Login successful!");
 
-    setTimeout(() => {
-      router.push("/");
-    }, 500);
+   setTimeout(() => {
+  const next =
+    new URLSearchParams(window.location.search)
+      .get("next");
+
+  router.push(next || "/");
+}, 500);
   }
 
   return (
