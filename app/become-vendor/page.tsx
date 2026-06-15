@@ -1,8 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { supabaseClient } from "../../lib/client";
+import { useEffect, useMemo, useState } from "react";
+import type { ComponentType, ReactNode } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { BadgeCheck, ImagePlus, Store, TrendingUp } from "lucide-react";
+import { supabaseClient } from "../../lib/client";
+
+const categories = [
+  "Photographer",
+  "Videographer",
+  "Makeup Artist",
+  "Mehndi Artist",
+  "Decorator",
+  "Wedding Hall",
+  "DJ",
+  "Wedding Car",
+  "Waza",
+];
 
 export default function BecomeVendorPage() {
   const router = useRouter();
@@ -14,42 +29,41 @@ export default function BecomeVendorPage() {
   const [description, setDescription] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [startingPrice, setStartingPrice] = useState("");
-const [experienceYears, setExperienceYears] = useState("");
-const [instagram, setInstagram] = useState("");
-const [facebook, setFacebook] = useState("");
-const [tagline, setTagline] = useState("");
-const [services, setServices] = useState("");
+  const [experienceYears, setExperienceYears] = useState("");
+  const [instagram, setInstagram] = useState("");
+  const [facebook, setFacebook] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [services, setServices] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
- useEffect(() => {
-  async function checkAccess() {
-    const {
-      data: { user },
-    } = await supabaseClient.auth.getUser();
+  const previewUrl = useMemo(() => (image ? URL.createObjectURL(image) : ""), [image]);
 
-    if (!user) {
-      router.push("/login");
-      return;
-    }
+  useEffect(() => {
+    async function checkAccess() {
+      const {
+        data: { user },
+      } = await supabaseClient.auth.getUser();
 
-    const { data: vendor } =
-      await supabaseClient
+      if (!user) {
+        router.push("/login?next=/become-vendor");
+        return;
+      }
+
+      const { data: vendor } = await supabaseClient
         .from("vendors")
         .select("id")
         .eq("user_id", user.id)
         .maybeSingle();
 
-    if (vendor) {
-      router.push("/dashboard");
+      if (vendor) router.push("/dashboard");
     }
-  }
 
-  checkAccess();
-}, [router]);
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+    checkAccess();
+  }, [router]);
 
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setLoading(true);
     setMessage("");
 
@@ -59,12 +73,11 @@ const [services, setServices] = useState("");
       } = await supabaseClient.auth.getUser();
 
       if (!user) {
-        setMessage("Please login first.");
+        setMessage("Please login before creating a vendor profile.");
         setLoading(false);
         return;
       }
 
-      // Check existing vendor profile
       const { data: existingVendor } = await supabaseClient
         .from("vendors")
         .select("id")
@@ -72,9 +85,7 @@ const [services, setServices] = useState("");
         .maybeSingle();
 
       if (existingVendor) {
-        setMessage(
-          "You already have a vendor profile. You can edit it from your dashboard."
-        );
+        setMessage("You already have a vendor profile. Open your dashboard to edit it.");
         setLoading(false);
         return;
       }
@@ -83,11 +94,9 @@ const [services, setServices] = useState("");
 
       if (image) {
         const fileName = `${user.id}-${Date.now()}-${image.name}`;
-
-        const { error: uploadError } =
-          await supabaseClient.storage
-            .from("vendor-images")
-            .upload(fileName, image);
+        const { error: uploadError } = await supabaseClient.storage
+          .from("vendor-images")
+          .upload(fileName, image);
 
         if (uploadError) {
           setMessage(uploadError.message);
@@ -97,339 +106,227 @@ const [services, setServices] = useState("");
 
         const {
           data: { publicUrl },
-        } = supabaseClient.storage
-          .from("vendor-images")
-          .getPublicUrl(fileName);
+        } = supabaseClient.storage.from("vendor-images").getPublicUrl(fileName);
 
         imageUrl = publicUrl;
       }
 
-      const { error } = await supabaseClient
-        .from("vendors")
-        .insert([
-          {
-  user_id: user.id,
-  business_name: businessName,
-  category,
-  district,
-  address,
-  phone,
-  description,
-  profile_image: imageUrl,
-
-  tagline,
-  starting_price: startingPrice,
-  experience_years: experienceYears,
-  instagram,
-  facebook,
-  services,
-
-  verified: false,
-  rating: 0,
-  total_reviews: 0,
-}
-        ]);
+      const { error } = await supabaseClient.from("vendors").insert([
+        {
+          user_id: user.id,
+          business_name: businessName,
+          category,
+          district,
+          address,
+          phone,
+          description,
+          profile_image: imageUrl,
+          tagline,
+          starting_price: startingPrice,
+          experience_years: experienceYears,
+          instagram,
+          facebook,
+          services,
+          verified: false,
+          rating: 0,
+          total_reviews: 0,
+        },
+      ]);
 
       if (error) {
         setMessage(error.message);
       } else {
-        setMessage(
-          "🎉 Vendor profile created successfully! Visit your dashboard."
-        );
-
-        setBusinessName("");
-        setCategory("Photographer");
-        setDistrict("");
-        setAddress("");
-        setPhone("");
-        setDescription("");
-setImage(null);
-
-setTagline("");
-setStartingPrice("");
-setExperienceYears("");
-setInstagram("");
-setFacebook("");
-setServices("");
+        setMessage("Vendor profile created. Open your dashboard to review it.");
+        setTimeout(() => router.push("/dashboard"), 900);
       }
-    } catch (err) {
-      console.error(err);
-      setMessage("Something went wrong.");
+    } catch (error) {
+      console.error(error);
+      setMessage("Something went wrong while creating your profile.");
     }
 
     setLoading(false);
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-indigo-900 py-16 px-4">
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-10">
-  <h1 className="text-5xl font-bold text-white">
-    Become a Vendor
-  </h1>
+    <main className="bg-stone-50">
+      <section className="border-b border-slate-200 bg-white">
+        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 lg:grid-cols-[0.9fr_1.1fr]">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-800">
+              Vendor onboarding
+            </p>
+            <h1 className="mt-4 text-5xl font-bold leading-tight">
+              List your wedding business and start receiving better leads.
+            </h1>
+            <p className="mt-5 leading-8 text-slate-600">
+              Create a professional profile for couples searching across
+              Kashmir. After your listing is live, you can upgrade to featured
+              placement from the pricing page.
+            </p>
+            <div className="mt-8 grid gap-4">
+              <Benefit icon={Store} title="Professional profile" body="Show your services, photos, pricing, district, and contact details." />
+              <Benefit icon={BadgeCheck} title="Verification ready" body="Admins can mark trusted vendors as verified after checking details." />
+              <Benefit icon={TrendingUp} title="Paid upgrade path" body="Offer featured listings and premium profiles to earn monthly revenue." />
+            </div>
+          </div>
 
-  <p className="text-purple-200 mt-4 text-lg">
-    Join Kashmir's fastest growing wedding marketplace
-  </p>
+          <form onSubmit={handleSubmit} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="grid gap-5">
+              <h2 className="text-2xl font-bold">Business details</h2>
+              <Input required label="Business name" value={businessName} onChange={setBusinessName} placeholder="Faizan Photography" />
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Category">
+                  <select
+                    value={category}
+                    onChange={(event) => setCategory(event.target.value)}
+                    className="w-full rounded-lg border border-slate-200 bg-stone-50 px-4 py-3 outline-none focus:border-emerald-900"
+                  >
+                    {categories.map((item) => (
+                      <option key={item}>{item}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Input required label="District" value={district} onChange={setDistrict} placeholder="Srinagar" />
+              </div>
+              <Input required label="Address" value={address} onChange={setAddress} placeholder="Full business address" />
+              <Input required label="Phone number" value={phone} onChange={setPhone} placeholder="+91 98765 43210" />
+              <Input required label="Tagline" value={tagline} onChange={setTagline} placeholder="Cinematic weddings across Kashmir" />
 
-  <div className="mt-8 grid md:grid-cols-3 gap-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <Input required label="Starting price" value={startingPrice} onChange={setStartingPrice} placeholder="25000" />
+                <Input label="Years of experience" value={experienceYears} onChange={setExperienceYears} placeholder="5" />
+              </div>
 
-    <div className="bg-white/10 p-4 rounded-2xl text-white">
-      📈 Get More Wedding Leads
-    </div>
+              <Textarea label="Services offered" value={services} onChange={setServices} placeholder="Wedding shoot, pre-wedding, drone, albums..." />
+              <Textarea required label="About your business" value={description} onChange={setDescription} placeholder="Tell couples what makes your service reliable and special." />
 
-    <div className="bg-white/10 p-4 rounded-2xl text-white">
-      ⭐ Build Your Reputation
-    </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Input label="Instagram link" value={instagram} onChange={setInstagram} placeholder="https://instagram.com/..." />
+                <Input label="Facebook link" value={facebook} onChange={setFacebook} placeholder="https://facebook.com/..." />
+              </div>
 
-    <div className="bg-white/10 p-4 rounded-2xl text-white">
-      💍 Reach Couples Across Kashmir
-    </div>
-
-  </div>
-</div>
-
-        <div
-          className="
-          bg-white/10
-          backdrop-blur-xl
-          border
-          border-white/20
-          rounded-3xl
-          p-8
-          shadow-2xl
-        "
-        >
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-5"
-          >
-            <h2 className="text-2xl font-bold text-white mb-2">
-  Business Information
-</h2>
-            <input
-              required
-              placeholder="Business Name (e.g. Faizan Photography)"
-              value={businessName}
-              onChange={(e) =>
-                setBusinessName(e.target.value)
-              }
-              className="
-              w-full
-              bg-white/10
-              border
-              border-white/20
-              rounded-xl
-              p-4
-              text-white
-              placeholder-gray-300
-              focus:outline-none
-              focus:ring-2
-              focus:ring-pink-400
-            "
-            />
-
-            <select
-              value={category}
-              onChange={(e) =>
-                setCategory(e.target.value)
-              }
-              className="
-              w-full
-              bg-white/10
-              border
-              border-white/20
-              rounded-xl
-              p-4
-              text-white
-              focus:outline-none
-              focus:ring-2
-              focus:ring-pink-400
-            "
-            >
-              <option className="text-black">
-                Photographer
-              </option>
-              <option className="text-black">
-                Videographer
-              </option>
-              <option className="text-black">
-                Makeup Artist
-              </option>
-              <option className="text-black">
-                Mehndi Artist
-              </option>
-              <option className="text-black">
-                Decorator
-              </option>
-              <option className="text-black">
-                Wedding Hall
-              </option>
-              <option className="text-black">
-                DJ
-              </option>
-              <option className="text-black">
-                Wedding Car
-              </option>
-              <option className="text-black">
-                Waza
-              </option>
-            </select>
-
-            <input
-              required
-              placeholder="District (Srinagar, Baramulla, Anantnag...)"
-              value={district}
-              onChange={(e) =>
-                setDistrict(e.target.value)
-              }
-              className="w-full bg-white/10 border border-white/20 rounded-xl p-4 text-white placeholder-gray-300"
-            />
-
-            <input
-              required
-              placeholder="Complete Business Address"
-              value={address}
-              onChange={(e) =>
-                setAddress(e.target.value)
-              }
-              className="w-full bg-white/10 border border-white/20 rounded-xl p-4 text-white placeholder-gray-300"
-            />
-
-            <input
-              required
-             placeholder="Business Contact Number"
-              value={phone}
-              onChange={(e) =>
-                setPhone(e.target.value)
-              }
-              className="w-full bg-white/10 border border-white/20 rounded-xl p-4 text-white placeholder-gray-300"
-            />
-
-            <input
-  required
-  placeholder="Business Tagline (e.g. Making Weddings Magical)"
-  value={tagline}
-  onChange={(e) => setTagline(e.target.value)}
-  className="w-full bg-white/10 border border-white/20 rounded-xl p-4 text-white placeholder-gray-300"
-/>
-
-<h2 className="text-2xl font-bold text-white pt-6">
-  Pricing & Experience
-</h2>
-<input
-  required
-  placeholder="Starting Price (₹)"
-  value={startingPrice}
-  onChange={(e) => setStartingPrice(e.target.value)}
-  className="w-full bg-white/10 border border-white/20 rounded-xl p-4 text-white placeholder-gray-300"
-/>
-
-<input
-  placeholder="Years of Experience"
-  value={experienceYears}
-  onChange={(e) => setExperienceYears(e.target.value)}
-  className="w-full bg-white/10 border border-white/20 rounded-xl p-4 text-white placeholder-gray-300"
-/>
-
-<h2 className="text-2xl font-bold text-white pt-6">
-  Social Media
-</h2>
-<input
-  placeholder="Instagram Link"
-  value={instagram}
-  onChange={(e) => setInstagram(e.target.value)}
-  className="w-full bg-white/10 border border-white/20 rounded-xl p-4 text-white placeholder-gray-300"
-/>
-
-<input
-  placeholder="Facebook Link"
-  value={facebook}
-  onChange={(e) => setFacebook(e.target.value)}
-  className="w-full bg-white/10 border border-white/20 rounded-xl p-4 text-white placeholder-gray-300"
-/>
-
-<h2 className="text-2xl font-bold text-white pt-6">
-  Services
-</h2>
-<textarea
-  placeholder="Services Offered (Photography, Pre-Wedding Shoots, Drone Coverage...)"
-  value={services}
-  onChange={(e) => setServices(e.target.value)}
-  className="w-full h-32 bg-white/10 border border-white/20 rounded-xl p-4 text-white placeholder-gray-300"
-/>
-            <h2 className="text-2xl font-bold text-white pt-6">
-  About Your Business
-</h2>
-            <textarea
-              required
-              placeholder="Tell customers about your services..."
-              value={description}
-              onChange={(e) =>
-                setDescription(e.target.value)
-              }
-              className="w-full h-40 bg-white/10 border border-white/20 rounded-xl p-4 text-white placeholder-gray-300"
-            />
-
-            <div className="bg-white/5 border border-dashed border-white/30 rounded-2xl p-6">
-              <p className="text-white mb-3 font-medium">
-                Upload Business Image
-              </p>
-
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) =>
-                  setImage(
-                    e.target.files?.[0] || null
-                  )
-                }
-                className="text-white"
-              />
-
-              {image && (
-                <div className="mt-4">
-                  <img
-                    src={URL.createObjectURL(image)}
-                    alt="Preview"
-                    className="h-48 w-full object-cover rounded-xl"
+              <Field label="Business image">
+                <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-stone-50 p-6 text-center hover:border-emerald-900">
+                  <ImagePlus className="h-8 w-8 text-emerald-900" />
+                  <span className="mt-2 font-semibold">Upload profile image</span>
+                  <span className="text-sm text-slate-500">JPG, PNG, or WebP</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => setImage(event.target.files?.[0] || null)}
+                    className="hidden"
                   />
+                </label>
+                {previewUrl && (
+                  <img src={previewUrl} alt="Preview" className="mt-4 h-52 w-full rounded-lg object-cover" />
+                )}
+              </Field>
+
+              <button
+                disabled={loading}
+                type="submit"
+                className="rounded-lg bg-emerald-900 px-5 py-4 font-semibold text-white hover:bg-emerald-800 disabled:opacity-60"
+              >
+                {loading ? "Creating profile..." : "Create vendor profile"}
+              </button>
+
+              {message && (
+                <div className="rounded-lg border border-slate-200 bg-stone-50 p-4 text-center font-medium">
+                  {message}
                 </div>
               )}
-            </div>
 
-            <button
-              disabled={loading}
-              type="submit"
-              className="
-              w-full
-              bg-gradient-to-r
-              from-pink-500
-              to-purple-600
-              text-white
-              font-semibold
-              py-4
-              rounded-xl
-              shadow-xl
-              hover:scale-105
-              transition
-              duration-300
-              disabled:opacity-50
-            "
-            >
-              {loading
-                ? "Creating Profile..."
-                : "🚀 Launch My Vendor Profile"}
-            </button>
+              <p className="text-center text-sm text-slate-500">
+                Want higher visibility? View{" "}
+                <Link href="/pricing" className="font-semibold text-emerald-900">
+                  vendor pricing
+                </Link>
+                .
+              </p>
+            </div>
           </form>
-
-          {message && (
-            <div className="mt-6 text-center text-white font-medium">
-              {message}
-            </div>
-          )}
         </div>
-      </div>
+      </section>
     </main>
+  );
+}
+
+function Benefit({
+  icon: Icon,
+  title,
+  body,
+}: {
+  icon: ComponentType<{ className?: string }>;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-stone-50 p-5">
+      <Icon className="h-7 w-7 text-emerald-900" />
+      <h3 className="mt-3 font-bold">{title}</h3>
+      <p className="mt-1 text-sm leading-6 text-slate-600">{body}</p>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-sm font-semibold text-slate-700">{label}</span>
+      {children}
+    </label>
+  );
+}
+
+function Input({
+  label,
+  value,
+  onChange,
+  placeholder,
+  required = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  required?: boolean;
+}) {
+  return (
+    <Field label={label}>
+      <input
+        required={required}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-lg border border-slate-200 bg-stone-50 px-4 py-3 outline-none focus:border-emerald-900"
+      />
+    </Field>
+  );
+}
+
+function Textarea({
+  label,
+  value,
+  onChange,
+  placeholder,
+  required = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  required?: boolean;
+}) {
+  return (
+    <Field label={label}>
+      <textarea
+        required={required}
+        rows={4}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-lg border border-slate-200 bg-stone-50 px-4 py-3 outline-none focus:border-emerald-900"
+      />
+    </Field>
   );
 }

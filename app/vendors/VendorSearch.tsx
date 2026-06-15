@@ -1,268 +1,222 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import type { ComponentType } from "react";
 import Link from "next/link";
+import {
+  BadgeCheck,
+  BriefcaseBusiness,
+  IndianRupee,
+  MapPin,
+  Search,
+  Star,
+} from "lucide-react";
 
-export default function VendorSearch({
-  vendors,
-}: {
-  vendors: any[];
-}) {
+type Vendor = {
+  id: string;
+  business_name?: string;
+  category?: string;
+  district?: string;
+  description?: string;
+  tagline?: string;
+  profile_image?: string;
+  experience_years?: number | string;
+  starting_price?: number | string;
+  rating?: number | string;
+  verified?: boolean;
+};
+
+const categories = [
+  "All",
+  "Photographer",
+  "Videographer",
+  "Makeup Artist",
+  "Decorator",
+  "Wedding Hall",
+  "DJ",
+  "Waza",
+  "Wedding Car",
+];
+
+export default function VendorSearch({ vendors }: { vendors: Vendor[] }) {
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] =
-    useState("All");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [district, setDistrict] = useState("All");
+  const [sort, setSort] = useState("Newest");
 
-  const filteredVendors = vendors.filter((vendor) => {
-    const matchesSearch = `
-      ${vendor.business_name}
-      ${vendor.category}
-      ${vendor.district}
-      ${vendor.description}
-    `
-      .toLowerCase()
-      .includes(search.toLowerCase());
+  const districts = useMemo(() => {
+    const values = vendors
+      .map((vendor) => vendor.district)
+      .filter(Boolean)
+      .map((value) => String(value));
+    return ["All", ...Array.from(new Set(values)).sort()];
+  }, [vendors]);
 
-    const matchesCategory =
-      selectedCategory === "All"
-        ? true
-        : vendor.category === selectedCategory;
+  const filteredVendors = useMemo(() => {
+    const filtered = vendors.filter((vendor) => {
+      const haystack = [
+        vendor.business_name,
+        vendor.category,
+        vendor.district,
+        vendor.description,
+        vendor.tagline,
+      ]
+        .join(" ")
+        .toLowerCase();
 
-    return matchesSearch && matchesCategory;
-  });
+      const matchesSearch = haystack.includes(search.toLowerCase());
+      const matchesCategory =
+        selectedCategory === "All" || vendor.category === selectedCategory;
+      const matchesDistrict = district === "All" || vendor.district === district;
+
+      return matchesSearch && matchesCategory && matchesDistrict;
+    });
+
+    return filtered.sort((a, b) => {
+      if (sort === "Rating") return Number(b.rating || 0) - Number(a.rating || 0);
+      if (sort === "Price") {
+        return Number(a.starting_price || 0) - Number(b.starting_price || 0);
+      }
+      if (sort === "Experience") {
+        return Number(b.experience_years || 0) - Number(a.experience_years || 0);
+      }
+      return 0;
+    });
+  }, [vendors, search, selectedCategory, district, sort]);
 
   return (
     <>
-      <div className="grid lg:grid-cols-4 gap-8 mb-12">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="grid gap-3 lg:grid-cols-[1fr_220px_180px_160px]">
+          <label className="relative block">
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search photographers, halls, waza, decorators..."
+              className="w-full rounded-lg border border-slate-200 bg-stone-50 py-3 pl-12 pr-4 text-slate-950 outline-none focus:border-emerald-900"
+            />
+          </label>
 
-  {/* LEFT SIDE */}
+          <select
+            value={selectedCategory}
+            onChange={(event) => setSelectedCategory(event.target.value)}
+            className="rounded-lg border border-slate-200 bg-stone-50 px-4 py-3 outline-none focus:border-emerald-900"
+          >
+            {categories.map((category) => (
+              <option key={category}>{category}</option>
+            ))}
+          </select>
 
-  <div className="lg:col-span-3">
+          <select
+            value={district}
+            onChange={(event) => setDistrict(event.target.value)}
+            className="rounded-lg border border-slate-200 bg-stone-50 px-4 py-3 outline-none focus:border-emerald-900"
+          >
+            {districts.map((item) => (
+              <option key={item}>{item}</option>
+            ))}
+          </select>
 
-    {/* Search */}
-
-    <div className="mb-6">
-      <input
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search photographers, decorators, wedding halls..."
-        className="
-        w-full
-        bg-white/10
-        border
-        border-white/20
-        rounded-2xl
-        p-5
-        text-white
-        placeholder-gray-400
-        "
-      />
-    </div>
-
-    {/* Categories */}
-
-    <div className="flex flex-wrap gap-3">
-
-      <button
-        onClick={() => setSelectedCategory("All")}
-        className={`px-5 py-3 rounded-full ${
-          selectedCategory === "All"
-            ? "bg-pink-500 text-white"
-            : "bg-white/10 text-white"
-        }`}
-      >
-        All Vendors
-      </button>
-
-      <button
-        onClick={() => setSelectedCategory("Photographer")}
-        className={`px-5 py-3 rounded-full ${
-          selectedCategory === "Photographer"
-            ? "bg-pink-500 text-white"
-            : "bg-white/10 text-white"
-        }`}
-      >
-        📸 Photographers
-      </button>
-
-      <button
-        onClick={() => setSelectedCategory("Videographer")}
-        className={`px-5 py-3 rounded-full ${
-          selectedCategory === "Videographer"
-            ? "bg-pink-500 text-white"
-            : "bg-white/10 text-white"
-        }`}
-      >
-        🎥 Videographers
-      </button>
-
-      <button
-        onClick={() => setSelectedCategory("Makeup Artist")}
-        className={`px-5 py-3 rounded-full ${
-          selectedCategory === "Makeup Artist"
-            ? "bg-pink-500 text-white"
-            : "bg-white/10 text-white"
-        }`}
-      >
-        💄 Makeup
-      </button>
-
-      <button
-        onClick={() => setSelectedCategory("Decorator")}
-        className={`px-5 py-3 rounded-full ${
-          selectedCategory === "Decorator"
-            ? "bg-pink-500 text-white"
-            : "bg-white/10 text-white"
-        }`}
-      >
-        🎉 Decorators
-      </button>
-
-      <button
-        onClick={() => setSelectedCategory("Wedding Hall")}
-        className={`px-5 py-3 rounded-full ${
-          selectedCategory === "Wedding Hall"
-            ? "bg-pink-500 text-white"
-            : "bg-white/10 text-white"
-        }`}
-      >
-        🏛 Wedding Halls
-      </button>
-
-      <button
-        onClick={() => setSelectedCategory("DJ")}
-        className={`px-5 py-3 rounded-full ${
-          selectedCategory === "DJ"
-            ? "bg-pink-500 text-white"
-            : "bg-white/10 text-white"
-        }`}
-      >
-        🎧 DJ
-      </button>
-
-      <button
-        onClick={() => setSelectedCategory("Waza")}
-        className={`px-5 py-3 rounded-full ${
-          selectedCategory === "Waza"
-            ? "bg-pink-500 text-white"
-            : "bg-white/10 text-white"
-        }`}
-      >
-        🍽 Waza
-      </button>
-
-    </div>
-
-  </div>
-
-  {/* RIGHT SIDE VENDOR CTA */}
-
-  
-</div>
-
-      {/* Results Count */}
-      <div className="text-center mb-8">
-        <p className="text-gray-400">
-          Showing {filteredVendors.length} vendor
-          {filteredVendors.length !== 1 ? "s" : ""}
-        </p>
+          <select
+            value={sort}
+            onChange={(event) => setSort(event.target.value)}
+            className="rounded-lg border border-slate-200 bg-stone-50 px-4 py-3 outline-none focus:border-emerald-900"
+          >
+            <option>Newest</option>
+            <option>Rating</option>
+            <option>Price</option>
+            <option>Experience</option>
+          </select>
+        </div>
       </div>
 
-      {/* Vendor Cards */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredVendors.map((vendor) => (
-          <Link
-            key={vendor.id}
-            href={`/vendors/${vendor.id}`}
-          >
-            <div
-              className="
-              group
-              bg-white/5
-              backdrop-blur-xl
-              border
-              border-white/10
-              rounded-3xl
-              overflow-hidden
-              hover:border-purple-500/50
-              hover:-translate-y-2
-              hover:shadow-[0_0_40px_rgba(168,85,247,0.35)]
-              transition-all
-              duration-500
-              "
+      <div className="mt-6 flex items-center justify-between">
+        <p className="text-sm text-slate-600">
+          Showing <span className="font-semibold text-slate-950">{filteredVendors.length}</span> vendors
+        </p>
+        <Link href="/become-vendor" className="text-sm font-semibold text-emerald-900 hover:underline">
+          Add your business
+        </Link>
+      </div>
+
+      {filteredVendors.length === 0 ? (
+        <div className="mt-8 rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center">
+          <h2 className="text-2xl font-bold">No vendors found</h2>
+          <p className="mt-2 text-slate-600">Try another category, district, or search term.</p>
+        </div>
+      ) : (
+        <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredVendors.map((vendor) => (
+            <Link
+              key={vendor.id}
+              href={`/vendors/${vendor.id}`}
+              className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-emerald-900 hover:shadow-xl"
             >
-              <div className="relative h-72 overflow-hidden">
+              <div className="relative h-60 overflow-hidden bg-slate-100">
                 {vendor.profile_image ? (
                   <img
                     src={vendor.profile_image}
-                    alt={vendor.business_name}
-                    className="
-                    w-full
-                    h-full
-                    object-cover
-                    group-hover:scale-110
-                    transition-transform
-                    duration-700
-                    "
+                    alt={vendor.business_name || "Vendor"}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-r from-purple-600 to-pink-600" />
+                  <div className="flex h-full w-full items-center justify-center bg-emerald-950 text-3xl font-bold text-white">
+                    {vendor.business_name?.slice(0, 2).toUpperCase() || "KW"}
+                  </div>
                 )}
+                <div className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-sm font-semibold text-slate-950 shadow">
+                  {vendor.category || "Vendor"}
+                </div>
+                {vendor.verified && (
+                  <div className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-emerald-900 px-3 py-1 text-sm font-semibold text-white">
+                    <BadgeCheck className="h-4 w-4" />
+                    Verified
+                  </div>
+                )}
+              </div>
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+              <div className="p-5">
+                <h2 className="text-xl font-bold text-slate-950">
+                  {vendor.business_name || "Wedding Vendor"}
+                </h2>
+                <p className="mt-1 line-clamp-1 text-sm text-slate-600">
+                  {vendor.tagline || vendor.description || "Professional wedding service"}
+                </p>
 
-                <div className="absolute top-4 left-4">
-                  <span className="bg-purple-600 text-white px-3 py-2 rounded-full text-sm">
-                    {vendor.category}
+                <div className="mt-5 grid gap-3 text-sm text-slate-700">
+                  <Info icon={MapPin} label={vendor.district || "Kashmir"} />
+                  <Info icon={BriefcaseBusiness} label={`${vendor.experience_years || 0}+ years experience`} />
+                  <Info icon={IndianRupee} label={`Starting from Rs ${vendor.starting_price || "Contact"}`} />
+                </div>
+
+                <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
+                  <span className="inline-flex items-center gap-1 text-sm font-semibold">
+                    <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    {vendor.rating || 5}
                   </span>
-                </div>
-
-                <div className="absolute bottom-4 left-4 right-4">
-                  <h2 className="text-2xl font-bold text-white">
-                    {vendor.business_name}
-                  </h2>
-
-                  <p className="text-pink-300">
-                    {vendor.tagline}
-                  </p>
+                  <span className="font-semibold text-emerald-900">View details</span>
                 </div>
               </div>
-
-              <div className="p-6">
-                <p className="text-gray-300">
-                  📍 {vendor.district}
-                </p>
-
-                <p className="text-cyan-300 mt-2">
-                  🎖 {vendor.experience_years || 0}+ Years
-                </p>
-
-                <p className="text-green-400 font-bold mt-2 text-lg">
-                  ₹ {vendor.starting_price}
-                </p>
-
-                <div className="mt-4">
-                  <p className="text-gray-400 line-clamp-2">
-                    {vendor.description}
-                  </p>
-                </div>
-
-                <div className="mt-6 flex justify-between items-center">
-                  <div>
-                    ⭐ {vendor.rating || 5}
-                  </div>
-
-                  <div className="text-pink-400 font-semibold">
-                    View Details →
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-      {/* Become Vendor Card */}
-
-
+            </Link>
+          ))}
+        </div>
+      )}
     </>
+  );
+}
+
+function Info({
+  icon: Icon,
+  label,
+}: {
+  icon: ComponentType<{ className?: string }>;
+  label: string;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <Icon className="h-4 w-4 text-emerald-900" />
+      <span>{label}</span>
+    </div>
   );
 }

@@ -1,0 +1,14 @@
+
+> kashmir-wedding-planner@0.1.0 dev
+> next dev --port 3001
+
+▲ Next.js 16.2.9 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://192.168.1.21:3001
+- Environments: .env.local
+✓ Ready in 906ms
+
+○ Compiling /pricing ...
+ GET /pricing 200 in 5.3s (next.js: 4.9s, application-code: 441ms)
+ GET / 200 in 68s (next.js: 1562ms, application-code: 66s)
+✓ Compiled in 146.7s

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { BarChart3, Store } from "lucide-react";
 import { supabaseClient } from "../../lib/client";
 
 export default function VendorActions() {
@@ -20,64 +21,39 @@ export default function VendorActions() {
         .select("id")
         .eq("user_id", user.id)
         .maybeSingle();
-        console.log("Vendor data:", data);
-console.log("User ID:", user.id);
 
-      if (data) {
-        setIsVendor(true);
-      }
+      setIsVendor(Boolean(data));
     }
 
     checkVendor();
   }, []);
 
- return (
-  <div className="flex justify-center gap-4 flex-wrap mt-8">
-
-    {isVendor ? (
-
-      <Link
-        href="/dashboard"
-        className="
-        bg-gradient-to-r
-        from-cyan-500
-        to-blue-600
-        text-white
-        px-8
-        py-4
-        rounded-2xl
-        font-semibold
-        shadow-lg
-        hover:scale-105
-        transition-all
-        "
-      >
-        📊 My Dashboard
-      </Link>
-
-    ) : (
+  return (
+    <div className="mt-8 flex flex-wrap gap-3">
+      {isVendor ? (
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-2 rounded-lg bg-emerald-900 px-5 py-3 font-semibold text-white hover:bg-emerald-800"
+        >
+          <BarChart3 className="h-5 w-5" />
+          My Dashboard
+        </Link>
+      ) : (
+        <Link
+          href="/become-vendor"
+          className="inline-flex items-center gap-2 rounded-lg bg-slate-950 px-5 py-3 font-semibold text-white hover:bg-emerald-900"
+        >
+          <Store className="h-5 w-5" />
+          List your business
+        </Link>
+      )}
 
       <Link
-        href="/become-vendor"
-        className="
-        bg-gradient-to-r
-        from-pink-500
-        to-purple-600
-        text-white
-        px-8
-        py-4
-        rounded-2xl
-        font-semibold
-        shadow-lg
-        hover:scale-105
-        transition-all
-        "
+        href="/pricing"
+        className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-800 hover:border-emerald-900"
       >
-        🚀 Become Vendor
+        See vendor plans
       </Link>
-
-    )}
-
-  </div>
-);
+    </div>
+  );
 }
