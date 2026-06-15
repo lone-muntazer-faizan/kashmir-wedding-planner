@@ -58,8 +58,10 @@ export default async function Home() {
             >
               Explore Vendors
             </Link>
-
-           <Link href="/vendor-entry">
+<Link
+  href="/become-vendor"
+  className="bg-yellow-400 text-black px-8 py-4 rounded-xl font-semibold hover:scale-105 transition"
+>
   Become Vendor
 </Link>
           </div>
