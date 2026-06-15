@@ -1,65 +1,182 @@
-import Image from "next/image";
+import Link from "next/link";
+import { supabase } from "../lib/supabase";
+import {
+  Camera,
+  Video,
+  Brush,
+  Music,
+  Car,
+  Utensils,
+  Building,
+  PartyPopper,
+} from "lucide-react";
 
-export default function Home() {
+const icons: Record<string, any> = {
+  Photographer: Camera,
+  Videographer: Video,
+  "Makeup Artist": Brush,
+  DJ: Music,
+  "Wedding Car": Car,
+  Waza: Utensils,
+  "Wedding Hall": Building,
+  Decorator: PartyPopper,
+};
+
+export default async function Home() {
+  const { data: categories } = await supabase
+    .from("categories")
+    .select("*");
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="bg-[#0f172a] text-white min-h-screen">
+
+      {/* HERO */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-fuchsia-700 to-pink-600 opacity-90" />
+
+        <div className="relative max-w-7xl mx-auto px-6 py-32 text-center">
+          <span className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm">
+            Kashmir's Premium Wedding Marketplace
+          </span>
+
+          <h1 className="text-6xl md:text-7xl font-extrabold mt-8 leading-tight">
+            Plan Your
+            <span className="block text-yellow-300">
+              Dream Wedding
+            </span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+          <p className="max-w-2xl mx-auto mt-6 text-lg text-white/90">
+            Discover photographers, videographers, wedding halls,
+            decorators, wazas and more across Kashmir.
           </p>
+
+          <div className="flex flex-wrap justify-center gap-4 mt-10">
+            <Link
+              href="/vendors"
+              className="bg-white text-black px-8 py-4 rounded-xl font-semibold hover:scale-105 transition"
+            >
+              Explore Vendors
+            </Link>
+
+            <Link
+              href="/become-vendor"
+              className="bg-black/30 backdrop-blur-md border border-white/30 px-8 py-4 rounded-xl hover:bg-black/50 transition"
+            >
+              Become Vendor
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* STATS */}
+      <section className="max-w-6xl mx-auto px-6 -mt-16 relative z-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="bg-slate-800 rounded-2xl p-6 text-center shadow-xl">
+            <h3 className="text-4xl font-bold text-purple-400">
+              500+
+            </h3>
+            <p className="text-gray-300 mt-2">
+              Vendors
+            </p>
+          </div>
+
+          <div className="bg-slate-800 rounded-2xl p-6 text-center shadow-xl">
+            <h3 className="text-4xl font-bold text-pink-400">
+              10K+
+            </h3>
+            <p className="text-gray-300 mt-2">
+              Customers
+            </p>
+          </div>
+
+          <div className="bg-slate-800 rounded-2xl p-6 text-center shadow-xl">
+            <h3 className="text-4xl font-bold text-yellow-400">
+              15+
+            </h3>
+            <p className="text-gray-300 mt-2">
+              Districts
+            </p>
+          </div>
+
+          <div className="bg-slate-800 rounded-2xl p-6 text-center shadow-xl">
+            <h3 className="text-4xl font-bold text-green-400">
+              4.9
+            </h3>
+            <p className="text-gray-300 mt-2">
+              Average Rating
+            </p>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* CATEGORIES */}
+      <section className="max-w-7xl mx-auto px-6 py-24">
+        <h2 className="text-5xl font-bold text-center mb-4">
+          Wedding Categories
+        </h2>
+
+        <p className="text-center text-gray-400 mb-14">
+          Everything you need for your perfect wedding.
+        </p>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          {categories?.map((category) => {
+            const Icon = icons[category.name];
+
+            return (
+              <div
+                key={category.id}
+                className="
+                group
+                bg-gradient-to-br
+                from-slate-800
+                to-slate-900
+                rounded-3xl
+                p-8
+                border
+                border-white/10
+                hover:border-purple-500
+                hover:-translate-y-2
+                transition
+                duration-300
+                shadow-xl
+                "
+              >
+                {Icon && (
+                  <Icon className="w-12 h-12 text-purple-400 group-hover:text-pink-400 transition mb-5" />
+                )}
+
+                <h3 className="font-semibold text-lg">
+                  {category.name}
+                </h3>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* FEATURE SECTION */}
+      <section className="max-w-7xl mx-auto px-6 pb-24">
+        <div className="bg-gradient-to-r from-purple-800 to-pink-700 rounded-3xl p-12">
+          <h2 className="text-4xl font-bold mb-4">
+            Are You a Wedding Professional?
+          </h2>
+
+          <p className="text-lg text-white/90 mb-8">
+            Join Kashmir's fastest-growing wedding marketplace and
+            connect with thousands of couples.
+          </p>
+
+          <Link
+            href="/become-vendor"
+            className="inline-block bg-white text-black px-8 py-4 rounded-xl font-semibold"
+          >
+            Join as Vendor
+          </Link>
+        </div>
+      </section>
+
+    </main>
   );
 }

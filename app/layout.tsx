@@ -27,7 +27,43 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+
+  <div className="flex-1">
+    {children}
+  </div>
+
+  <footer className="bg-slate-950 border-t border-white/10">
+    <div className="max-w-7xl mx-auto px-6 py-8">
+
+      <div className="flex flex-wrap justify-center gap-6 text-gray-400">
+
+        <a href="/about" className="hover:text-white">
+          About Us
+        </a>
+
+        <a href="/contact" className="hover:text-white">
+          Contact Us
+        </a>
+
+        <a href="/privacy" className="hover:text-white">
+          Privacy Policy
+        </a>
+
+        <a href="/terms" className="hover:text-white">
+          Terms of Service
+        </a>
+
+      </div>
+
+      <p className="text-center text-gray-500 mt-6">
+        © 2026 Kashmir Wedding. All Rights Reserved.
+      </p>
+
+    </div>
+  </footer>
+
+</body>
     </html>
   );
 }
